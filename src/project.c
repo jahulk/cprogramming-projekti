@@ -58,11 +58,6 @@ int calculate_total_points(struct student s)
     return sum;
 }
 
-void print_student(struct student s)
-{
-    printf("%s %s %s\n", s.id, s.firstname, s.lastname);
-}
-
 void print_students(struct student *collection, unsigned int n)
 {
     struct student s;
@@ -78,14 +73,45 @@ void print_students(struct student *collection, unsigned int n)
     }
 }
 
+int student_already_in_collection(char* id, struct student *collection, unsigned int n)
+{
+    if (n == 0) return 0;
+
+    for (unsigned int i=0; i<n; i++)
+    {
+        if (strcmp(id, collection[i].id) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+void delete_student(struct student *s)
+{
+    free(s->firstname);
+    free(s->lastname);
+}
+
+void delete_collection(struct student *collection, unsigned int n)
+{
+    for (unsigned int i = 0; i<n; i++)
+    {
+        delete_student(&collection[i]);
+    }
+
+    free(collection);
+}
+
 int main(void)
 {
     struct student *student_collection = NULL;
     unsigned int size = 0;
     char buffer[1000];
-    char command;
-    int keep_going = 1;
-    while (keep_going)
+    char command = 'X';
+    
+    while (command != 'Q')
     {
         fgets(buffer, 1000, stdin);
         command = buffer[0];
@@ -101,9 +127,17 @@ int main(void)
             int retval = init_student(&new_student, id, firstname, lastname);
             if (retval == 0)
             {
-                printf("Error!\n");
+                printf("Error! Invalid arguments\n");
                 break;
             }
+
+            if (student_already_in_collection(new_student.id, student_collection, size))
+            {
+                printf("Error! Student already in collection\n");
+                delete_student(&new_student);
+                break;
+            }
+
             student_collection = add_student_to_collection(student_collection, size, new_student);
             size++;
             printf("SUCCESS\n");
@@ -113,11 +147,12 @@ int main(void)
             printf("SUCCESS\n");
             break;
         case 'Q':
-            keep_going = 0;
             break;
         default:
             printf("Invalid command %c\n", command);
             break;
         }
     }
+
+    delete_collection(student_collection, size);
 }
