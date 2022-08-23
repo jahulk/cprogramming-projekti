@@ -41,7 +41,7 @@ int init_student(struct student *p_student, char *p_id, char *p_firstname, char 
 
 struct student *add_student_to_collection(struct student *collection, unsigned int size, struct student new_student)
 {
-    struct student *new_collection = new_collection = realloc(collection, (size + 1) * sizeof(struct student));
+    struct student *new_collection = realloc(collection, (size + 1) * sizeof(struct student));
     new_collection[size] = new_student;
 
     return new_collection;
@@ -73,20 +73,31 @@ void print_students(struct student *collection, unsigned int n)
     }
 }
 
-int student_already_in_collection(char* id, struct student *collection, unsigned int n)
+struct student *get_student_by_id(char* id, struct student *collection, unsigned int n)
 {
-    if (n == 0) return 0;
-
     for (unsigned int i=0; i<n; i++)
     {
         if (strcmp(id, collection[i].id) == 0)
         {
-            return 1;
+            return &collection[i];
         }
+    }
+
+    return NULL;
+}
+
+int student_already_in_collection(char* id, struct student *collection, unsigned int n)
+{
+    if (n == 0) return 0;
+
+    if (get_student_by_id(id, collection, n) != NULL)
+    {
+        return 1;
     }
 
     return 0;
 }
+
 
 void delete_student(struct student *s)
 {
@@ -115,35 +126,70 @@ int main(void)
     {
         fgets(buffer, 1000, stdin);
         command = buffer[0];
-
+        int args;
+        char id[100];
         switch (command)
         {
         case 'A':;
-            char id[100];
             char firstname[100];
             char lastname[100];
-            int args = sscanf(buffer, "A %s %s %s", id, firstname, lastname);
+            args = sscanf(buffer, "A %s %s %s", id, firstname, lastname);
+
+            if (student_already_in_collection(id, student_collection, size))
+            {
+                printf("Student %s is already in the database.\n", id);
+                break;
+            }
+
             if (args != 3)
             {
                 printf("A should be followed by exactly 3 arguments.\n");
                 break;
             }
+
             struct student new_student;
             int retval = init_student(&new_student, id, firstname, lastname);
+            
             if (retval == 0)
             {
                 break;
             }
 
-            if (student_already_in_collection(new_student.id, student_collection, size))
+            student_collection = add_student_to_collection(student_collection, size, new_student);
+            size++;
+            printf("SUCCESS\n");
+            break;
+        case 'U':;
+            int round;
+            int points;
+            args = sscanf(buffer, "U %s %d %d", id, &round, &points);
+            struct student *s = get_student_by_id(id, student_collection, size);
+
+            if (args != 3)
             {
-                printf("Student %s is already in the database.\n");
-                delete_student(&new_student);
+                printf("U should be followed by exactly 3 arguments.\n");
                 break;
             }
 
-            student_collection = add_student_to_collection(student_collection, size, new_student);
-            size++;
+            if (s == NULL) 
+            {
+                printf("Student %s is not in the database.\n", id);
+                break;
+            }
+
+            if (round < 1 || round > 6)
+            {
+                printf("Round cannot be less than 1 or larger than 6\n");
+                break;
+            }
+
+            if (points < 0)
+            {
+                printf("Student cannot have negative points.\n");
+                break;
+            }
+
+            s->points[round-1] = points;
             printf("SUCCESS\n");
             break;
         case 'L':
