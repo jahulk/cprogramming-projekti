@@ -13,9 +13,9 @@ struct student
 
 int init_student(struct student *p_student, char *p_id, char *p_firstname, char *p_lastname)
 {
-    int numvalue = atoi(p_id);
-    if (numvalue > 999999 || numvalue < 0)
+    if (strlen(p_id) > 6)
     {
+        printf("Student number %s cannot be more than 6 digits.\n", p_id);
         return 0;
     }
 
@@ -119,21 +119,25 @@ int main(void)
         switch (command)
         {
         case 'A':;
-            char id[7];
-            char firstname[20];
-            char lastname[20];
-            sscanf(buffer, "A %s %s %s", id, firstname, lastname);
+            char id[100];
+            char firstname[100];
+            char lastname[100];
+            int args = sscanf(buffer, "A %s %s %s", id, firstname, lastname);
+            if (args != 3)
+            {
+                printf("A should be followed by exactly 3 arguments.\n");
+                break;
+            }
             struct student new_student;
             int retval = init_student(&new_student, id, firstname, lastname);
             if (retval == 0)
             {
-                printf("Error! Invalid arguments\n");
                 break;
             }
 
             if (student_already_in_collection(new_student.id, student_collection, size))
             {
-                printf("Error! Student already in collection\n");
+                printf("Student %s is already in the database.\n");
                 delete_student(&new_student);
                 break;
             }
