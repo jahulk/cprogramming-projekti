@@ -31,20 +31,31 @@ int init_student(struct student *p_student, char *p_id, char *p_firstname, char 
     p_student->lastname = malloc(strlen(p_lastname) + 1);
     strcpy(p_student->lastname, p_lastname);
 
-    for (int i=0; i<6; i++)
+    for (int i = 0; i < 6; i++)
     {
         p_student->points[i] = 0;
     }
-    
+
     return 1;
 }
 
 struct student *add_student_to_collection(struct student *collection, unsigned int size, struct student new_student)
 {
-    struct student *new_collection = new_collection = (struct student*) realloc(collection, (size+1)*sizeof(struct student));
+    struct student *new_collection = new_collection = realloc(collection, (size + 1) * sizeof(struct student));
     new_collection[size] = new_student;
 
     return new_collection;
+}
+
+int calculate_total_points(struct student s)
+{
+    int sum = 0;
+    for (int i = 0; i < 6; i++)
+    {
+        sum += s.points[i];
+    }
+
+    return sum;
 }
 
 void print_student(struct student s)
@@ -55,15 +66,15 @@ void print_student(struct student s)
 void print_students(struct student *collection, unsigned int n)
 {
     struct student s;
-    for (unsigned int i=0; i < n; i++)
+    for (unsigned int i = 0; i < n; i++)
     {
         s = collection[i];
         printf("%s %s %s ", s.id, s.firstname, s.lastname);
-        for (int j=0; j<6; j++)
+        for (int j = 0; j < 6; j++)
         {
             printf("%d ", s.points[j]);
         }
-        printf("\n");
+        printf("%d\n", calculate_total_points(s));
     }
 }
 
@@ -98,8 +109,8 @@ int main(void)
             printf("SUCCESS\n");
             break;
         case 'L':
-            ;
             print_students(student_collection, size);
+            printf("SUCCESS\n");
             break;
         case 'Q':
             keep_going = 0;
