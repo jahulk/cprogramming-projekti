@@ -73,9 +73,9 @@ void print_students(struct student *collection, unsigned int n)
     }
 }
 
-struct student *get_student_by_id(char* id, struct student *collection, unsigned int n)
+struct student *get_student_by_id(char *id, struct student *collection, unsigned int n)
 {
-    for (unsigned int i=0; i<n; i++)
+    for (unsigned int i = 0; i < n; i++)
     {
         if (strcmp(id, collection[i].id) == 0)
         {
@@ -86,9 +86,10 @@ struct student *get_student_by_id(char* id, struct student *collection, unsigned
     return NULL;
 }
 
-int student_already_in_collection(char* id, struct student *collection, unsigned int n)
+int student_already_in_collection(char *id, struct student *collection, unsigned int n)
 {
-    if (n == 0) return 0;
+    if (n == 0)
+        return 0;
 
     if (get_student_by_id(id, collection, n) != NULL)
     {
@@ -98,7 +99,6 @@ int student_already_in_collection(char* id, struct student *collection, unsigned
     return 0;
 }
 
-
 void delete_student(struct student *s)
 {
     free(s->firstname);
@@ -107,12 +107,20 @@ void delete_student(struct student *s)
 
 void delete_collection(struct student *collection, unsigned int n)
 {
-    for (unsigned int i = 0; i<n; i++)
+    for (unsigned int i = 0; i < n; i++)
     {
         delete_student(&collection[i]);
     }
 
     free(collection);
+}
+
+int compare(const void *a, const void *b)
+{
+    struct student *eka = (struct student *)a;
+    struct student *toka = (struct student *)b;
+
+    return  (-1)*(calculate_total_points(*eka)-calculate_total_points(*toka));
 }
 
 int main(void)
@@ -121,7 +129,7 @@ int main(void)
     unsigned int size = 0;
     char buffer[1000];
     char command = 'X';
-    
+
     while (command != 'Q')
     {
         fgets(buffer, 1000, stdin);
@@ -130,7 +138,8 @@ int main(void)
         char id[100];
         switch (command)
         {
-        case 'A':;
+        case 'A':
+        {
             char firstname[100];
             char lastname[100];
             args = sscanf(buffer, "A %s %s %s", id, firstname, lastname);
@@ -140,16 +149,17 @@ int main(void)
                 printf("Student %s is already in the database.\n", id);
                 break;
             }
-
+            
             if (args != 3)
             {
                 printf("A should be followed by exactly 3 arguments.\n");
                 break;
             }
 
+            
             struct student new_student;
             int retval = init_student(&new_student, id, firstname, lastname);
-            
+
             if (retval == 0)
             {
                 break;
@@ -159,10 +169,12 @@ int main(void)
             size++;
             printf("SUCCESS\n");
             break;
-        case 'U':;
+        }
+        case 'U':
+        {
             int round;
-            int points;
-            args = sscanf(buffer, "U %s %d %d", id, &round, &points);
+            int new_points;
+            args = sscanf(buffer, "U %s %d %d", id, &round, &new_points);
             struct student *s = get_student_by_id(id, student_collection, size);
 
             if (args != 3)
@@ -171,7 +183,7 @@ int main(void)
                 break;
             }
 
-            if (s == NULL) 
+            if (s == NULL)
             {
                 printf("Student %s is not in the database.\n", id);
                 break;
@@ -183,16 +195,19 @@ int main(void)
                 break;
             }
 
-            if (points < 0)
+            if (new_points < 0)
             {
                 printf("Student cannot have negative points.\n");
                 break;
             }
 
-            s->points[round-1] = points;
+            s->points[round - 1] = new_points;
             printf("SUCCESS\n");
             break;
+        }
         case 'L':
+            // Sort students based on total points in ascending order
+            qsort(student_collection, size, sizeof(struct student), compare);
             print_students(student_collection, size);
             printf("SUCCESS\n");
             break;
