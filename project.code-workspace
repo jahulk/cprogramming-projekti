@@ -4,5 +4,10 @@
 			"name": "Project",
 			"path": "."
 		},
-	]
+	],
+	"settings": {
+		"files.associations": {
+			"project.h": "c"
+		}
+	}
 }

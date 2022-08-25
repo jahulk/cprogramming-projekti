@@ -3,22 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct student
-{
-    char id[7];
-    char *firstname;
-    char *lastname;
-    int points[6];
-};
-
+/**
+ * @brief Initializes student and reserves memory for fields
+ * 
+ * @param p_student Student to initialize
+ * @param p_id Id
+ * @param p_firstname Firstname
+ * @param p_lastname Lastname
+ * @return int Returns 1 if operation successful
+ */
 int init_student(struct student *p_student, char *p_id, char *p_firstname, char *p_lastname)
 {
-    if (strlen(p_id) > 6)
-    {
-        printf("Student number %s cannot be more than 6 digits.\n", p_id);
-        return 0;
-    }
-
     for (int i = 0; i < 7; i++)
     {
         p_student->id[i] = p_id[i];
@@ -39,6 +34,14 @@ int init_student(struct student *p_student, char *p_id, char *p_firstname, char 
     return 1;
 }
 
+/**
+ * @brief Adds student to collection
+ * 
+ * @param collection Student collection
+ * @param size Current size
+ * @param new_student Student to add
+ * @return struct student* Returns pointer to new collection
+ */
 struct student *add_student_to_collection(struct student *collection, unsigned int size, struct student new_student)
 {
     struct student *new_collection = realloc(collection, (size + 1) * sizeof(struct student));
@@ -47,6 +50,12 @@ struct student *add_student_to_collection(struct student *collection, unsigned i
     return new_collection;
 }
 
+/**
+ * @brief Calculates total exercise points for student
+ * 
+ * @param s Student
+ * @return int Total points
+ */
 int calculate_total_points(struct student s)
 {
     int sum = 0;
@@ -58,6 +67,13 @@ int calculate_total_points(struct student s)
     return sum;
 }
 
+/**
+ * @brief Prints student information to stream
+ * 
+ * @param collection Student collection
+ * @param n Number of students in collection
+ * @param stream Output stream
+ */
 void print_students(struct student *collection, unsigned int n, FILE *stream)
 {
     struct student s;
@@ -73,6 +89,14 @@ void print_students(struct student *collection, unsigned int n, FILE *stream)
     }
 }
 
+/**
+ * @brief Finds student by id
+ * 
+ * @param id Id of student
+ * @param collection Student collection
+ * @param n Number of students in collection
+ * @return struct student* Returns pointer to student if found, otherwise returns NULL
+ */
 struct student *get_student_by_id(char *id, struct student *collection, unsigned int n)
 {
     for (unsigned int i = 0; i < n; i++)
@@ -86,11 +110,16 @@ struct student *get_student_by_id(char *id, struct student *collection, unsigned
     return NULL;
 }
 
+/**
+ * @brief Check's if student is already in collection
+ * 
+ * @param id Student's Id
+ * @param collection Student collection
+ * @param n Number of students
+ * @return int Returns 1 if student already in collection, otherwise returns 0
+ */
 int student_already_in_collection(char *id, struct student *collection, unsigned int n)
 {
-    if (n == 0)
-        return 0;
-
     if (get_student_by_id(id, collection, n) != NULL)
     {
         return 1;
@@ -99,12 +128,23 @@ int student_already_in_collection(char *id, struct student *collection, unsigned
     return 0;
 }
 
+/**
+ * @brief Frees memory reserved  for firstname and lastname fields
+ *
+ * @param s Student to delete
+ */
 void delete_student(struct student *s)
 {
     free(s->firstname);
     free(s->lastname);
 }
 
+/**
+ * @brief Frees memory reserved for collection
+ *
+ * @param collection Collection to delete
+ * @param n Size of collection
+ */
 void delete_collection(struct student *collection, unsigned int n)
 {
     for (unsigned int i = 0; i < n; i++)
@@ -115,6 +155,13 @@ void delete_collection(struct student *collection, unsigned int n)
     free(collection);
 }
 
+/**
+ * @brief Compares 2 student's total points
+ *
+ * @param a First student
+ * @param b Second student
+ * @return int Integer
+ */
 int compare(const void *a, const void *b)
 {
     struct student *eka = (struct student *)a;
@@ -135,6 +182,7 @@ int main(void)
     {
         fgets(buffer, 1000, stdin);
         command = buffer[0];
+        // Number of succesfully read args
         int args;
         char id[100];
         char firstname[100];
@@ -158,7 +206,13 @@ int main(void)
                 printf("Student %s is already in the database.\n", id);
                 break;
             }
-            
+
+            if (strlen(id) > 6)
+            {
+                printf("Student number %s cannot be more than 6 digits.\n", id);
+                return 0;
+            }
+
             struct student new_student;
             int retval = init_student(&new_student, id, firstname, lastname);
 
@@ -208,7 +262,7 @@ int main(void)
             break;
         }
         case 'L':
-            // Sort students based on total points in ascending order
+            // Sort students based on total points in descending order
             qsort(student_collection, size, sizeof(struct student), compare);
             print_students(student_collection, size, stdout);
             printf("SUCCESS\n");
@@ -227,7 +281,7 @@ int main(void)
 
             if (!f)
             {
-                printf("Cannot open file %s.\n", filename);
+                printf("Cannot open file %s for writing.\n", filename);
                 break;
             }
 
@@ -261,7 +315,7 @@ int main(void)
             size = 0;
 
             int p1, p2, p3, p4, p5, p6;
-            
+
             while (fgets(buffer, 1000, f) != NULL)
             {
                 args = sscanf(buffer, "%s %s %s %d %d %d %d %d %d", id, firstname, lastname, &p1, &p2, &p3, &p4, &p5, &p6);
